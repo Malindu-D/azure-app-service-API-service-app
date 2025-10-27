@@ -28,6 +28,8 @@ Static Web App → Azure App Service (this API) → Azure Service Bus → Functi
 - Static Web Application (for sending requests)
 - Azure Function App (for consuming messages)
 
+> 💡 **Note**: This application uses Azure Service Bus **Basic tier** (most cost-effective). See [SERVICE-BUS-TIERS.md](SERVICE-BUS-TIERS.md) for tier comparison.
+
 ## Local Development
 
 ### 1. Clone or navigate to the project
@@ -224,7 +226,7 @@ az servicebus namespace create `
   --resource-group $RESOURCE_GROUP `
   --name $SERVICE_BUS_NAMESPACE `
   --location $LOCATION `
-  --sku Standard
+  --sku Basic
 
 az servicebus queue create `
   --resource-group $RESOURCE_GROUP `

@@ -17,7 +17,7 @@ az servicebus namespace create `
   --resource-group $RESOURCE_GROUP `
   --name $SERVICE_BUS_NAMESPACE `
   --location $LOCATION `
-  --sku Standard
+  --sku Basic
 
 Write-Host "Creating Service Bus queue..." -ForegroundColor Green
 az servicebus queue create `

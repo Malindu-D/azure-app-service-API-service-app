@@ -19,7 +19,7 @@ az servicebus namespace create \
   --resource-group $RESOURCE_GROUP \
   --name $SERVICE_BUS_NAMESPACE \
   --location $LOCATION \
-  --sku Standard
+  --sku Basic
 
 echo "Creating Service Bus queue..."
 az servicebus queue create \

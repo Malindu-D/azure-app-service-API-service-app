@@ -21,7 +21,9 @@ Complete step-by-step guide using only the Azure Portal web interface.
    - **Resource Group**: Select existing or create new (e.g., `rg-userdata-api`)
    - **Namespace name**: Enter unique name (e.g., `sb-userdata-12345`)
    - **Location**: Choose region (e.g., `East US`)
-   - **Pricing tier**: Select **"Standard"** (required for queues)
+   - **Pricing tier**: Select **"Basic"** (cheapest, works for queues) or **"Standard"** (if you need topics)
+     - 💡 **Basic tier is sufficient** for this application - we only use queues
+     - Standard/Premium only needed for: Topics, Transactions, Duplicate Detection, Auto-forwarding
    - Click **"Review + create"**
    - Click **"Create"**
 
@@ -356,7 +358,7 @@ After completing all steps, your configuration should look like this:
 ### Service Bus Namespace
 
 - ✅ Name: `sb-yourname-12345`
-- ✅ Tier: Standard
+- ✅ Tier: Basic (or Standard if you need topics/subscriptions)
 - ✅ Queue: `userdata-queue`
 
 ### App Service
@@ -419,7 +421,7 @@ After completing all steps, your configuration should look like this:
 
 Use this checklist to verify everything is configured:
 
-- [ ] Service Bus namespace created (Standard tier)
+- [ ] Service Bus namespace created (Basic or Standard tier)
 - [ ] Queue `userdata-queue` created
 - [ ] App Service created (.NET 8 runtime)
 - [ ] Managed Identity enabled on App Service
