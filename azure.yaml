@@ -1,0 +1,6 @@
+{
+  "$schema": "https://aka.ms/azure-dev/schema/1.0.0/azure.yaml.json",
+  "name": "test-api-service-app",
+  "services":
+    { "api": { "project": ".", "language": "dotnet", "host": "appservice" } },
+}
