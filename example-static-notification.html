@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Notification - Static Web App</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #0078d4;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+      label {
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      input:focus {
+        outline: none;
+        border-color: #0078d4;
+      }
+      .optional {
+        color: #999;
+        font-weight: normal;
+        font-size: 12px;
+      }
+      button {
+        width: 100%;
+        margin-top: 20px;
+        padding: 12px;
+        background: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #005a9e;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      #result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 4px;
+        display: none;
+      }
+      .success {
+        background: #dff6dd;
+        border: 1px solid #4caf50;
+        color: #2e7d32;
+      }
+      .error {
+        background: #ffebee;
+        border: 1px solid #f44336;
+        color: #c62828;
+      }
+      pre {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 12px;
+      }
+      .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #1565c0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📧 Email Notification</h1>
+      <p class="subtitle">
+        Send email notification request to email export app
+      </p>
+
+      <div class="info-box">
+        <strong>How it works:</strong> This form sends a request to the API app,
+        which forwards it to your email export app. The email export app fetches
+        data from the database and sends the email via Azure Communication
+        Services.
+      </div>
+
+      <form id="notificationForm">
+        <label for="recipientEmail"> Recipient Email Address </label>
+        <input
+          type="email"
+          id="recipientEmail"
+          name="recipientEmail"
+          placeholder="user@example.com"
+          required
+        />
+
+        <label for="templateId">
+          Template ID <span class="optional">(optional)</span>
+        </label>
+        <input
+          type="text"
+          id="templateId"
+          name="templateId"
+          placeholder="welcome-email"
+        />
+
+        <label for="dataId">
+          Data ID <span class="optional">(optional)</span>
+        </label>
+        <input
+          type="text"
+          id="dataId"
+          name="dataId"
+          placeholder="order-12345"
+        />
+
+        <button type="submit" id="submitBtn">Send Notification</button>
+      </form>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      // ⚠️ IMPORTANT: Replace with your actual API endpoint
+      const API_ENDPOINT =
+        "https://your-api-app.azurewebsites.net/api/notification";
+
+      document
+        .getElementById("notificationForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const submitBtn = document.getElementById("submitBtn");
+          const resultDiv = document.getElementById("result");
+
+          // Disable button and show loading state
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Sending...";
+          resultDiv.style.display = "none";
+
+          // Prepare data (only include non-empty optional fields)
+          const data = {
+            recipientEmail: document.getElementById("recipientEmail").value,
+          };
+
+          const templateId = document.getElementById("templateId").value;
+          if (templateId) {
+            data.templateId = templateId;
+          }
+
+          const dataId = document.getElementById("dataId").value;
+          if (dataId) {
+            data.dataId = dataId;
+          }
+
+          try {
+            console.log("Sending to API:", data);
+
+            const response = await fetch(API_ENDPOINT, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            console.log("Response from API:", result);
+
+            // Show result
+            resultDiv.style.display = "block";
+
+            if (response.ok) {
+              resultDiv.className = "success";
+              resultDiv.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        <p>${result.message}</p>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+
+              // Reset form
+              document.getElementById("notificationForm").reset();
+            } else {
+              resultDiv.className = "error";
+              resultDiv.innerHTML = `
+                        <strong>❌ Error</strong><br>
+                        <p>${
+                          result.message || "Failed to send notification"
+                        }</p>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            resultDiv.style.display = "block";
+            resultDiv.className = "error";
+            resultDiv.innerHTML = `
+                    <strong>❌ Network Error</strong><br>
+                    <p>${error.message}</p>
+                    <p>Please check the API endpoint URL and ensure CORS is configured correctly.</p>
+                `;
+          } finally {
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Notification";
+          }
+        });
+    </script>
+  </body>
+</html>

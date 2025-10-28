@@ -7,7 +7,8 @@ $LOCATION = "eastus"
 $APP_SERVICE_PLAN = "asp-userdata-api"
 $APP_SERVICE_NAME = "app-userdata-api-$(Get-Random)"
 $SERVICE_BUS_NAMESPACE = "sb-userdata-$(Get-Random)"
-$QUEUE_NAME = "userdata-queue"
+$USERDATA_QUEUE_NAME = "userdata-queue"
+$EMAIL_EXPORT_APP_URL = "https://your-email-export-app.azurewebsites.net"  # Update with your email export app URL
 
 Write-Host "Creating resource group..." -ForegroundColor Green
 az group create --name $RESOURCE_GROUP --location $LOCATION
@@ -23,7 +24,7 @@ Write-Host "Creating Service Bus queue..." -ForegroundColor Green
 az servicebus queue create `
   --resource-group $RESOURCE_GROUP `
   --namespace-name $SERVICE_BUS_NAMESPACE `
-  --name $QUEUE_NAME
+  --name $USERDATA_QUEUE_NAME
 
 Write-Host "Creating App Service Plan..." -ForegroundColor Green
 az appservice plan create `
@@ -68,7 +69,9 @@ az webapp config appsettings set `
   --resource-group $RESOURCE_GROUP `
   --settings `
     "ServiceBus__Namespace=$SERVICE_BUS_NAMESPACE.servicebus.windows.net" `
-    "ServiceBus__QueueOrTopicName=$QUEUE_NAME" `
+    "ServiceBus__UserDataQueue=$USERDATA_QUEUE_NAME" `
+    "ServiceBus__QueueOrTopicName=$USERDATA_QUEUE_NAME" `
+    "EmailExportApp__Url=$EMAIL_EXPORT_APP_URL" `
     "Cors__AllowedOrigins__0=https://your-static-web-app.azurestaticapps.net"
 
 Write-Host "Publishing application..." -ForegroundColor Green
@@ -86,4 +89,10 @@ az webapp deployment source config-zip `
 Write-Host "Deployment complete!" -ForegroundColor Green
 Write-Host "App Service URL: https://$APP_SERVICE_NAME.azurewebsites.net" -ForegroundColor Yellow
 Write-Host "Service Bus Namespace: $SERVICE_BUS_NAMESPACE.servicebus.windows.net" -ForegroundColor Yellow
-Write-Host "Queue Name: $QUEUE_NAME" -ForegroundColor Yellow
+Write-Host "User Data Queue: $USERDATA_QUEUE_NAME" -ForegroundColor Yellow
+Write-Host "" -ForegroundColor Yellow
+Write-Host "API Endpoints:" -ForegroundColor Cyan
+Write-Host "  - User Data: https://$APP_SERVICE_NAME.azurewebsites.net/api/userdata" -ForegroundColor White
+Write-Host "  - Notification: https://$APP_SERVICE_NAME.azurewebsites.net/api/notification" -ForegroundColor White
+Write-Host "" -ForegroundColor Yellow
+Write-Host "⚠️  IMPORTANT: Update EmailExportApp__Url in App Service configuration with your actual email export app URL" -ForegroundColor Yellow

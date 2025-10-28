@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Send Email Notification</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
+        width: 100%;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .subtitle {
+        color: #666;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 14px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 600;
+      }
+
+      label .required {
+        color: #e74c3c;
+      }
+
+      label .optional {
+        color: #95a5a6;
+        font-weight: normal;
+        font-size: 12px;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+        font-family: inherit;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 120px;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        display: none;
+      }
+
+      .result.success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+
+      .result.error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+
+      .result.show {
+        display: block;
+      }
+
+      .config-section {
+        margin-top: 30px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+        border-left: 4px solid #667eea;
+      }
+
+      .config-section label {
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+
+      .config-section input {
+        font-size: 14px;
+      }
+
+      .info {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #666;
+      }
+
+      .char-count {
+        font-size: 12px;
+        color: #999;
+        text-align: right;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📧 Email Notification</h1>
+      <p class="subtitle">Send email notifications via API</p>
+
+      <form id="notificationForm">
+        <div class="form-group">
+          <label for="recipientEmail">
+            Recipient Email <span class="required">*</span>
+          </label>
+          <input
+            type="email"
+            id="recipientEmail"
+            name="recipientEmail"
+            required
+            maxlength="254"
+            placeholder="user@example.com"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="subject"> Subject <span class="required">*</span> </label>
+          <input
+            type="text"
+            id="subject"
+            name="subject"
+            required
+            minlength="1"
+            maxlength="200"
+            placeholder="Email subject line"
+          />
+          <div class="char-count"><span id="subjectCount">0</span>/200</div>
+        </div>
+
+        <div class="form-group">
+          <label for="message"> Message <span class="required">*</span> </label>
+          <textarea
+            id="message"
+            name="message"
+            required
+            minlength="1"
+            maxlength="5000"
+            placeholder="Email message content..."
+          ></textarea>
+          <div class="char-count"><span id="messageCount">0</span>/5000</div>
+        </div>
+
+        <div class="form-group">
+          <label for="senderName">
+            Sender Name <span class="optional">(optional)</span>
+          </label>
+          <input
+            type="text"
+            id="senderName"
+            name="senderName"
+            maxlength="100"
+            placeholder="Your name or organization"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="priority">
+            Priority <span class="optional">(optional)</span>
+          </label>
+          <select id="priority" name="priority">
+            <option value="Normal" selected>Normal</option>
+            <option value="Low">Low</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="metadata">
+            Metadata <span class="optional">(optional, JSON)</span>
+          </label>
+          <input
+            type="text"
+            id="metadata"
+            name="metadata"
+            placeholder='{"campaign":"welcome","source":"web"}'
+          />
+        </div>
+
+        <button type="submit" id="submitBtn">Send Notification</button>
+      </form>
+
+      <div id="result" class="result"></div>
+
+      <div class="config-section">
+        <label for="apiUrl">API Endpoint</label>
+        <input
+          type="text"
+          id="apiUrl"
+          value="https://your-app-service.azurewebsites.net/api/notification"
+          placeholder="API URL"
+        />
+        <div class="info">
+          💡 Update this with your actual Azure App Service URL before deploying
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Character counters
+      const subjectInput = document.getElementById("subject");
+      const messageInput = document.getElementById("message");
+      const subjectCount = document.getElementById("subjectCount");
+      const messageCount = document.getElementById("messageCount");
+
+      subjectInput.addEventListener("input", () => {
+        subjectCount.textContent = subjectInput.value.length;
+      });
+
+      messageInput.addEventListener("input", () => {
+        messageCount.textContent = messageInput.value.length;
+      });
+
+      // Get API URL from input
+      const getApiUrl = () => document.getElementById("apiUrl").value;
+
+      document
+        .getElementById("notificationForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const submitBtn = document.getElementById("submitBtn");
+          const resultDiv = document.getElementById("result");
+
+          // Collect form data - USE THESE EXACT VARIABLE NAMES
+          const recipientEmail =
+            document.getElementById("recipientEmail").value;
+          const subject = document.getElementById("subject").value;
+          const message = document.getElementById("message").value;
+          const senderName = document.getElementById("senderName").value;
+          const priority = document.getElementById("priority").value;
+          const metadata = document.getElementById("metadata").value;
+
+          // Disable button during submission
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Sending...";
+
+          // Hide previous results
+          resultDiv.className = "result";
+
+          try {
+            // Prepare request body with exact variable names
+            const requestBody = {
+              recipientEmail: recipientEmail, // Variable name: recipientEmail
+              subject: subject, // Variable name: subject
+              message: message, // Variable name: message
+              priority: priority, // Variable name: priority
+            };
+
+            // Add optional fields only if they have values
+            if (senderName) {
+              requestBody.senderName = senderName; // Variable name: senderName
+            }
+
+            if (metadata) {
+              requestBody.metadata = metadata; // Variable name: metadata
+            }
+
+            const response = await fetch(getApiUrl(), {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(requestBody),
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+              // Success
+              resultDiv.className = "result success show";
+              resultDiv.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        ${result.message}<br><br>
+                        <strong>Correlation ID:</strong> ${
+                          result.correlationId
+                        }<br>
+                        <strong>Recipient:</strong> ${result.recipient}<br>
+                        <strong>Priority:</strong> ${result.priority}<br>
+                        <strong>Status:</strong> ${result.status}<br>
+                        <strong>Queued At:</strong> ${new Date(
+                          result.receivedAt
+                        ).toLocaleString()}
+                    `;
+
+              // Reset form
+              document.getElementById("notificationForm").reset();
+              subjectCount.textContent = "0";
+              messageCount.textContent = "0";
+            } else {
+              // API returned an error
+              resultDiv.className = "result error show";
+
+              if (response.status === 400 && result.errors) {
+                // Validation errors
+                const errors = Object.values(result.errors).flat().join("<br>");
+                resultDiv.innerHTML = `
+                            <strong>❌ Validation Error</strong><br>
+                            ${errors}
+                        `;
+              } else {
+                resultDiv.innerHTML = `
+                            <strong>❌ Error</strong><br>
+                            ${
+                              result.message ||
+                              "An error occurred while sending the notification."
+                            }
+                        `;
+              }
+            }
+          } catch (error) {
+            // Network or other errors
+            resultDiv.className = "result error show";
+            resultDiv.innerHTML = `
+                    <strong>❌ Connection Error</strong><br>
+                    Failed to connect to the API. Please check:<br>
+                    • The API URL is correct<br>
+                    • The API service is running<br>
+                    • CORS is properly configured<br><br>
+                    <em>Error: ${error.message}</em>
+                `;
+          } finally {
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Notification";
+          }
+        });
+
+      // Optional: Test connection on page load
+      window.addEventListener("load", async () => {
+        try {
+          const apiUrl = getApiUrl().replace(
+            "/api/notification",
+            "/api/notification/health"
+          );
+          const response = await fetch(apiUrl);
+          if (response.ok) {
+            console.log("✅ Notification API connection test successful");
+          }
+        } catch (error) {
+          console.warn(
+            "⚠️ Could not connect to Notification API:",
+            error.message
+          );
+        }
+      });
+    </script>
+  </body>
+</html>

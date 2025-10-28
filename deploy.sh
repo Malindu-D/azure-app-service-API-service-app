@@ -9,7 +9,8 @@ LOCATION="eastus"
 APP_SERVICE_PLAN="asp-userdata-api"
 APP_SERVICE_NAME="app-userdata-api-${RANDOM}"
 SERVICE_BUS_NAMESPACE="sb-userdata-${RANDOM}"
-QUEUE_NAME="userdata-queue"
+USERDATA_QUEUE_NAME="userdata-queue"
+NOTIFICATION_QUEUE_NAME="notification-queue"
 
 echo "Creating resource group..."
 az group create --name $RESOURCE_GROUP --location $LOCATION
@@ -21,11 +22,16 @@ az servicebus namespace create \
   --location $LOCATION \
   --sku Basic
 
-echo "Creating Service Bus queue..."
+echo "Creating Service Bus queues..."
 az servicebus queue create \
   --resource-group $RESOURCE_GROUP \
   --namespace-name $SERVICE_BUS_NAMESPACE \
-  --name $QUEUE_NAME
+  --name $USERDATA_QUEUE_NAME
+
+az servicebus queue create \
+  --resource-group $RESOURCE_GROUP \
+  --namespace-name $SERVICE_BUS_NAMESPACE \
+  --name $NOTIFICATION_QUEUE_NAME
 
 echo "Creating App Service Plan..."
 az appservice plan create \
@@ -70,7 +76,9 @@ az webapp config appsettings set \
   --resource-group $RESOURCE_GROUP \
   --settings \
     ServiceBus__Namespace="${SERVICE_BUS_NAMESPACE}.servicebus.windows.net" \
-    ServiceBus__QueueOrTopicName="$QUEUE_NAME" \
+    ServiceBus__UserDataQueue="$USERDATA_QUEUE_NAME" \
+    ServiceBus__NotificationQueue="$NOTIFICATION_QUEUE_NAME" \
+    ServiceBus__QueueOrTopicName="$USERDATA_QUEUE_NAME" \
     Cors__AllowedOrigins__0="https://your-static-web-app.azurestaticapps.net"
 
 echo "Deploying application..."
@@ -87,4 +95,9 @@ az webapp deployment source config-zip \
 echo "Deployment complete!"
 echo "App Service URL: https://${APP_SERVICE_NAME}.azurewebsites.net"
 echo "Service Bus Namespace: ${SERVICE_BUS_NAMESPACE}.servicebus.windows.net"
-echo "Queue Name: $QUEUE_NAME"
+echo "User Data Queue: $USERDATA_QUEUE_NAME"
+echo "Notification Queue: $NOTIFICATION_QUEUE_NAME"
+echo ""
+echo "API Endpoints:"
+echo "  - User Data: https://${APP_SERVICE_NAME}.azurewebsites.net/api/userdata"
+echo "  - Notification: https://${APP_SERVICE_NAME}.azurewebsites.net/api/notification"

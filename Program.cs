@@ -8,8 +8,11 @@ builder.Services.AddControllers();
 // Add Application Insights for monitoring
 builder.Services.AddApplicationInsightsTelemetry();
 
-// Register Service Bus service as singleton for connection pooling
+// Register Service Bus service as singleton for connection pooling (used by UserData feature)
 builder.Services.AddSingleton<IServiceBusService, ServiceBusService>();
+
+// Register HTTP client for Email Export App (used by Notification feature)
+builder.Services.AddHttpClient<IEmailExportService, EmailExportService>();
 
 // Add CORS policy to allow requests from static web application
 builder.Services.AddCors(options =>
